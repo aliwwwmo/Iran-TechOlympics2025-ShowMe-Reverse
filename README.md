@@ -1,6 +1,23 @@
-# توضیح کامل تابع FUN_00101525 (تابع main) با مثال واقعی
+
+<img width="1920" height="958" alt="{6D3A9562-8E6E-472B-8C82-9D2E8DE63AC6}" src="https://github.com/user-attachments/assets/4cd2322d-f450-409b-af05-74b8c1d6f50b" />
+
+
+
+
+# Write-up: Show_Me Reverse Engineering Challenge
+
+نمای کلی چالش
+
+
+
+
+این یک چالش ریورس انجینیرینگ است که در آن یک برنامه C ورودی کاربر را دریافت کرده و آن را به فرمت QR Code تبدیل می‌کند، سپس داده‌های باینری QR Code را به هگزادسیمال تبدیل می‌کند.
+
+
+# توضیح کامل تابع FUN_00101525 
 
 ---
+<img width="1717" height="990" alt="{886DB25D-5534-45D4-B27A-5A752215EEF4}" src="https://github.com/user-attachments/assets/8e327dd5-1fe8-4800-bef8-e3a9bb19d47a" />
 
 ## 🧠 نمای کلی
 
@@ -274,13 +291,10 @@ return 0;
 
 ---
 
-> این کامل‌ترین تحلیل از تابع `FUN_00101525` با ورودی واقعی `flag` بود 🎯
 
 
 
 
-
-🔍 کد کامل تابع با شماره خط
 
 ```c
 1   void FUN_00101329(char *param_1, undefined1 *param_2)
@@ -316,8 +330,6 @@ return 0;
 31  }
 ```
 
-📝 تحلیل خط به خط با مثال عملی
-
 ورودی مثال ما:
 
 ```c
@@ -339,7 +351,7 @@ long local_10;       // مقدار canary
 
 توضیح هر متغیر:
 
-**QRcode *pQVar3:**
+** QRcode *pQVar3: **
 
 این یک pointer به ساختار زیر است:
 
@@ -753,9 +765,8 @@ Iteration  Row Col  Index  Value
 
 نتیجه نهایی param_2:
 
-[1,1,1,0,0, 1,0,0,1,1, 1,0,1,0,1, 0,1,1,1,0, 0,1,0,0,1]
+<img width="1202" height="153" alt="{3884F1BC-8247-414E-BB11-69493E54142F}" src="https://github.com/user-attachments/assets/6edff912-139c-401b-be84-068e90ab6030" />
 
-└─Row0──┘ └─Row1──┘ └─Row2──┘ └─Row3──┘ └─Row4──┘
 
 عملیات & 1 چیست؟
 pQVar3->data[i] می‌تواند مقادیر مختلفی داشته باشد:
@@ -875,111 +886,6 @@ strcpy(buffer, "این رشته خیلی بلند است!");  // Overflow!
 
 ---
 
-🎯 **خلاصه کامل با Flowchart جامع**
-
-```
-START
-↓
-ورودی: “flag±±…±*+” (38 chars)
-↓
-Stack Canary: ذخیره مقدار امنیتی
-local_10 = 0xDEADBEEFCAFEBABE
-↓
-QRcode_encodeString():
-- تحلیل ورودی → Byte Mode
-- محاسبه Version → 3 (29×29)
-- Binary Encoding
-- Error Correction (Reed-Solomon)
-- Matrix Generation
-↓
-خروجی QRcode_encodeString:
-pQVar3->version = 3
-pQVar3->width = 29
-pQVar3->data = [841 bytes]
-↓
-Check Error: pQVar3 == NULL?
-YES → Print error + exit(1)
-NO → Continue
-↓
-uVar2 = 29 (width)
-memset(param_2, 0, 841) → پاک کردن آرایه خروجی
-↓
-حلقه خارجی: for row = 0 to 28
-حلقه داخلی: for col = 0 to 28
-index = row * 29 + col
-param_2[index] = qr_data[index] & 1
-Total: 841 iterations
-↓
-نتیجه در param_2:
-[1,1,1,0,0,1,…] ← Row 0 (29 bytes)
-[1,0,0,1,1,0,…] ← Row 1 (29 bytes)
-…
-[0,1,0,1,1,0,…] ← Row 28 (29 bytes)
-↓
-QRcode_free(pQVar3) → آزادسازی 841 bytes
-↓
-Stack Canary Check:
-local_10 == canary?
-YES → Return OK
-NO → __stack_chk_fail() → CRASH
-↓
-END
-```
-
-🔬 **مثال کامل برای درک بهتر**
-
-فرض کنیم یک QR کوچک 3×3 داریم (برای سادگی):
-
-ورودی:
-
-```c
-input = "ABC"
-```
-
-QR Matrix تولید شده:
-
-```
-0 1 2
-0│ 1 0 1
-1│ 0 1 0
-2│ 1 1 0
-```
-
-داده در pQVar3->data:
-
-```
-Index: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-Value: [1, 0, 1, 0, 1, 0, 1, 1, 0]
-```
-
-Iterations:
-
-```python
-# Row 0
-param_2[0] = data[0*3+0] & 1 = data[0] & 1 = 1
-param_2[1] = data[0*3+1] & 1 = data[1] & 1 = 0
-param_2[2] = data[0*3+2] & 1 = data[2] & 1 = 1
-
-# Row 1
-param_2[3] = data[1*3+0] & 1 = data[3] & 1 = 0
-param_2[4] = data[1*3+1] & 1 = data[4] & 1 = 1
-param_2[5] = data[1*3+2] & 1 = data[5] & 1 = 0
-
-# Row 2
-param_2[6] = data[2*3+0] & 1 = data[6] & 1 = 1
-param_2[7] = data[2*3+1] & 1 = data[7] & 1 = 1
-param_2[8] = data[2*3+2] & 1 = data[8] & 1 = 0
-```
-
-نتیجه:
-
-```c
-param_2 = [1,0,1, 0,1,0, 1,1,0]
-```
-
-این دقیقاً همان ماتریس اصلی است ولی به صورت یک آرایه یک‌بعدی! 🎉
-
-این تابع به طور خلاصه: متن را به یک ماتریس binary QR code تبدیل می‌کند که بعداً توسط تابع دیگر به hexadecimal تبدیل خواهد شد! 🚀
 
 
 # Step 3: تبدیل به Hex (تابع FUN_00101454)
@@ -1305,27 +1211,8 @@ Row2: 1 1 1 0 0 → 0b11100000 → 0xE0
 
 خروجی:
 
-```c
-hex_output = "b058e0..."
-            ││││└─ Row2 byte 2
-            │││└── Row2 byte 1
-            ││└─── Row1 byte 2
-            │└──── Row1 byte 1
-            └───── Row0 byte 1
-```
+<img width="1039" height="543" alt="{55127C43-DDAF-425D-8D2E-29DED7CE1949}" src="https://github.com/user-attachments/assets/ff682dd7-250c-4686-bb8e-24e7795f00f9" />
 
-🎯 چرا Transpose؟
-
-Normal row-major: [Row0_Col0, Row0_Col1, …, Row0_Col28]
-
-This algorithm: [Row0_Col0, Row1_Col0, …, Row28_Col0]
-↑ خواندن ستونی!
-
-دلیل احتمالی:
-
-* افزایش پیچیدگی reverse engineering
-* ایجاد dependency بین سطرهای مختلف
-* الگوی غیرمعمول داده
 
 🔢 محاسبه دقیق Indices
 
@@ -1510,3 +1397,156 @@ Ky7Xm2Qp9Vs1Lf880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860
 | خروجی نهایی    | Ky7Xm2Qp9Vs1Lf880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860 | 72  |
 
 ⚠️ توجه: مقادیر Hex و Prefix در بالا فرضی هستند. برای داده واقعی باید کد با کتابخانه `libqrencode` اجرا شود.
+
+
+
+
+
+# 📋 مراحل حل چالش QR Code CTF
+
+## مرحله 1: تحلیل باینری (Reverse Engineering)
+
+ابتدا باید فایل اجرایی را با ابزارهای مهندسی معکوس تحلیل کنیم:
+
+```bash
+# بررسی نوع فایل
+file challenge
+
+# دیس‌اسمبل کردن
+objdump -d challenge > disassembly.txt
+
+# یا استفاده از Ghidra/IDA Pro
+```
+
+چیزهایی که باید پیدا کنیم:
+
+* ✅ تابع padding (`processEntry`) و الگوی `+-*`
+* ✅ استفاده از `libqrencode` برای تولید QR
+* ✅ نحوه تبدیل ماتریس QR به hex (خواندن ستونی)
+* ✅ اضافه شدن 14 کاراکتر prefix تصادفی
+
+---
+
+## مرحله 2: شناسایی فرمت داده
+
+از تحلیل کد متوجه می‌شویم:
+
+```
+خروجی = [14 char random] + [hex از QR code]
+```
+
+* Prefix 14 کاراکتری تصادفی باید حذف شود.
+* QR Code از نوع Version 3 است (سایز 29×29)
+* داده به صورت 4 بایت در هر سطر ذخیره شده (29 سطر × 4 = 116 بایت = 232 کاراکتر hex)
+* خواندن داده: سطر به سطر، از MSB به LSB
+
+---
+
+## مرحله 3: نوشتن اسکریپت دیکدر
+
+برعکس فرآیند encode را پیاده‌سازی می‌کنیم:
+
+```python
+from PIL import Image
+from pyzbar.pyzbar import decode
+
+def decode_ctf_qr(output_path):
+    # ── گام 1: خواندن فایل خروجی ──
+    hexstr = open(output_path, 'r').read().strip()
+    print(f"[+] رشته کامل: {hexstr[:50]}... (طول: {len(hexstr)})")
+
+    # ── گام 2: حذف 14 کاراکتر prefix ──
+    prefix = hexstr[:14]
+    hex_cipher = hexstr[14:]
+    print(f"[+] Prefix: {prefix}")
+    print(f"[+] Hex cipher: {hex_cipher[:50]}... (طول: {len(hex_cipher)})")
+
+    # ── گام 3: تبدیل hex به بایت ──
+    data = bytes.fromhex(hex_cipher)
+    print(f"[+] تعداد بایت‌ها: {len(data)} (انتظار: 116)")
+
+    # ── گام 4: بازسازی ماتریس 29×29 QR ──
+    size = 29
+    matrix = [[0]*size for _ in range(size)]
+    for row in range(size):
+        for k in range(4):  # هر سطر 4 بایت
+            byte_index = row * 4 + k
+            byte = data[byte_index]
+            for b in range(8):  # MSB → LSB
+                col = k * 8 + b
+                if col < size:
+                    bit = (byte >> (7 - b)) & 1
+                    matrix[row][col] = bit
+    print(f"[+] ماتریس {size}×{size} بازسازی شد")
+
+    # ── گام 5: تبدیل ماتریس به تصویر PNG ──
+    scale = 10
+    img = Image.new('RGB', (size*scale, size*scale), 'white')
+    pixels = img.load()
+    for y in range(size):
+        for x in range(size):
+            color = 0 if matrix[y][x] == 1 else 255
+            for dy in range(scale):
+                for dx in range(scale):
+                    pixels[x*scale+dx, y*scale+dy] = (color, color, color)
+    img.save('reconstructed_qr.png')
+    print("[+] تصویر QR ذخیره شد: reconstructed_qr.png")
+
+    # ── گام 6: اسکن و دیکد QR Code ──
+    decoded = decode(img)
+    if decoded:
+        text = decoded[0].data.decode('utf-8')
+        print(f"\n🎉 FLAG: {text}")
+        return text
+    else:
+        print("❌ QR code خوانده نشد!")
+        return None
+
+if __name__ == '__main__':
+    decode_ctf_qr('output.txt')
+```
+
+---
+
+## 🔍 تحلیل دقیق‌تر هر بخش
+
+1. **چرا 14 کاراکتر اول را حذف می‌کنیم؟**
+
+```c
+// در کد اصلی:
+char prefix[15];
+generate_random_prefix(prefix, 14);
+strcat(output, prefix);
+```
+
+* فقط برای سردرگمی است و اطلاعاتی ندارد.
+
+2. **چرا 116 بایت؟**
+
+* ماتریس QR = 29×29 بیت
+* هر سطر = 29 بیت → نیاز به 4 بایت (32 بیت)
+* کل داده = 29×4 = 116 بایت
+
+3. **چرا خواندن MSB-first؟**
+
+```python
+bit = (byte >> (7 - b)) & 1
+```
+
+* مطابق با نحوه encode اصلی.
+
+4. **چرا scale = 10؟**
+
+* برای قابل اسکن شدن QR code توسط pyzbar.
+
+---
+
+## 🚀 اجرای نهایی
+
+```bash
+# نصب کتابخانه‌ها
+pip install pillow pyzbar
+
+# اجرا
+python decode_qr.py
+```
