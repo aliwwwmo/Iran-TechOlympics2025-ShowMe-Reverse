@@ -1,15 +1,14 @@
 
 <img width="1920" height="958" alt="{6D3A9562-8E6E-472B-8C82-9D2E8DE63AC6}" src="https://github.com/user-attachments/assets/4cd2322d-f450-409b-af05-74b8c1d6f50b" />
 
-# ⚠️ Note: This text was translated from Persian to English using AI. While it should be mostly accurate, some technical nuances or context-specific details may not be perfectly preserved.
+⚠️ Note: This text was translated from Persian to English using AI. While it should be mostly accurate, some technical nuances or context-specific details may not be perfectly preserved.
 
 ---
 # Write-up: Show_Me Reverse Engineering Challenge
 
 
-# 📋 فهرست مراحل توابع
 
-# 📋 Table of Contents
+## 📋 Table of Contents
 
 - [Step 3: Convert to Hex (function FUN_00101454)](#step-3-convert-to-hex-function-fun_00101454)
 - [Complete explanation of function FUN_00101525](#complete-explanation-of-function-fun_00101525)
@@ -1216,7 +1215,7 @@ Output:
 hex_output = "b058e0..."
 ```
 
-(Shown image: repository-hosted preview of the QR/visualization.)
+<img width="1039" height="543" alt="{55127C43-DDAF-425D-8D2E-29DED7CE1949}" src="https://github.com/user-attachments/assets/ff682dd7-250c-4686-bb8e-24e7795f00f9" />
 
 ---
 
