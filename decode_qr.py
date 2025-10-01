@@ -40,7 +40,6 @@ def decode_ctf_qr(output_path):
     # 6) با pyzbar اسکن می‌کنیم
     decoded = decode(img)
     if decoded:
-        # معمولاً یک دیتا داریم
         text = decoded[0].data.decode('utf-8')
         print("Decoded text:", text)
     else:
