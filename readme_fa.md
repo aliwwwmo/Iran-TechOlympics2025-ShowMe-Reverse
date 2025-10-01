@@ -1,7 +1,30 @@
-## Complete Explanation of Function FUN_00101525
+
+<img width="1920" height="958" alt="{6D3A9562-8E6E-472B-8C82-9D2E8DE63AC6}" src="https://github.com/user-attachments/assets/4cd2322d-f450-409b-af05-74b8c1d6f50b" />
+
+# ⚠️ Note: This text was translated from Persian to English using AI. While it should be mostly accurate, some technical nuances or context-specific details may not be perfectly preserved.
+
+---
+# Write-up: Show_Me Reverse Engineering Challenge
+
+
+# 📋 فهرست مراحل توابع
+
+# 📋 Table of Contents
+
+- [Step 3: Convert to Hex (function FUN_00101454)](#step-3-convert-to-hex-function-fun_00101454)
+- [Complete explanation of function FUN_00101525](#complete-explanation-of-function-fun_00101525)
+- [fun_00101329](#fun_00101329)
+- [Encoding walkthrough for ASIS{test}](#encoding-walkthrough-for-asis-test)
+- [📋 Steps to solve the Show_Me CTF challenge](#-steps-to-solve-the-show_me-ctf-challenge)
 
 ---
 
+
+
+## Complete Explanation of Function FUN_00101525
+
+---
+# Complete explanation of function FUN_00101525
 ### 🧠 Overview
 
 This function contains the main logic of the program. It takes the user input, applies padding, encodes it into a **QR Code**, converts the QR data into **hexadecimal**, and finally adds a random **Salt** at the beginning.
@@ -118,34 +141,7 @@ local_139 = 0;
 
 📦 **Final Salt:** `6931fac9dab23e`
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img width="1717" height="990" alt="{886DB25D-5534-45D4-B27A-5A752215EEF4}" src="https://github.com/user-attachments/assets/8e327dd5-1fe8-4800-bef8-e3a9bb19d47a" />
 
   ## 🔹 Section 5: Memory Allocation
 
