@@ -1,50 +1,44 @@
+- 🇮🇷 **[Persian Version](readme_fa.md)** 
 
 <img width="1920" height="958" alt="{6D3A9562-8E6E-472B-8C82-9D2E8DE63AC6}" src="https://github.com/user-attachments/assets/4cd2322d-f450-409b-af05-74b8c1d6f50b" />
 
+⚠️ Note: This text was translated from Persian to English using AI. While it should be mostly accurate, some technical nuances or context-specific details may not be perfectly preserved.
 
-
-
+---
 # Write-up: Show_Me Reverse Engineering Challenge
 
-نمای کلی چالش
 
 
+## 📋 Table of Contents
 
-
-این یک چالش ریورس انجینیرینگ است که در آن یک برنامه C ورودی کاربر را دریافت کرده و آن را به فرمت QR Code تبدیل می‌کند، سپس داده‌های باینری QR Code را به هگزادسیمال تبدیل می‌کند.
-
-
-
-# 📋 فهرست مطالب
-
-- [🎯 توضیح کامل تابع FUN_00101525](#توضیح-کامل-تابع-fun_00101525)
-- [🎯 توضیح کامل تابع FUN_00101329](#fun_00101329)
-- [🎯 توضیح کامل تابع fun_00101454](#step-3-تبدیل-به-hex-تابع-fun_00101454)
-- [🔐 مثال](#رمزگذاری-مرحله-به-مرحله-برای-asis-test)
-- [💻 پاسخ](#مراحل-حل-چالش-show_me-ctf)
-
-
-## توضیح کامل تابع FUN_00101525 
-
----
-<img width="1717" height="990" alt="{886DB25D-5534-45D4-B27A-5A752215EEF4}" src="https://github.com/user-attachments/assets/8e327dd5-1fe8-4800-bef8-e3a9bb19d47a" />
-
-## 🧠 نمای کلی
-
-این تابع منطق اصلی برنامه است. ورودی کاربر را می‌گیرد، آن را پدینگ می‌کند، سپس با استفاده از **QR Code** رمزگذاری کرده و در نهایت خروجی را به **هگزادسیمال** تبدیل می‌کند و در ابتدای آن یک **Salt** تصادفی اضافه می‌کند.
-
-در این تحلیل، هر خط کد را با مثال ورودی:
-
-```
-ورودی کاربر: flag
-طول: ۴ کاراکتر
-```
-
-بررسی می‌کنیم تا دقیقاً بفهمیم هر بخش چه کاری انجام می‌دهد.
+- [Step 3: Convert to Hex (function FUN_00101454)](#step-3-convert-to-hex-function-fun_00101454)
+- [Complete explanation of function FUN_00101525](#complete-explanation-of-function-fun_00101525)
+- [fun_00101329](#fun_00101329)
+- [Encoding walkthrough for ASIS{test}](#encoding-walkthrough-for-asis-test)
+- [📋 Steps to solve the Show_Me CTF challenge](#-steps-to-solve-the-show_me-ctf-challenge)
 
 ---
 
-## 🔹 بخش ۱: تعریف متغیرها
+
+
+## Complete Explanation of Function FUN_00101525
+
+---
+# Complete explanation of function FUN_00101525
+### 🧠 Overview
+
+This function contains the main logic of the program. It takes the user input, applies padding, encodes it into a **QR Code**, converts the QR data into **hexadecimal**, and finally adds a random **Salt** at the beginning.
+
+In this analysis, each line of code is explained step by step using the following example input:
+
+```
+User input: flag
+Length: 4 characters
+```
+
+---
+
+### 🔹 Section 1: Variable Definitions
 
 ```c
 undefined8 FUN_00101525(void)
@@ -69,29 +63,29 @@ undefined8 FUN_00101525(void)
   long local_10;
 ```
 
-**توضیح متغیرها:**
+**Variable Explanation:**
 
-| متغیر                                 | توضیح                        |
-| ------------------------------------- | ---------------------------- |
-| `local_498[849]`                      | ذخیره QR code (ماتریس 29×29) |
-| `local_147[14]`                       | رشته تصادفی Salt             |
-| `local_138`, `local_130`, `local_128` | جدول کاراکترهای hex          |
-| `local_118[38]`                       | بافر ورودی کاربر             |
-| `local_4b4`, `local_4b0`              | شمارنده‌های حلقه             |
+| Variable                              | Description                       |
+| ------------------------------------- | --------------------------------- |
+| `local_498[849]`                      | Stores the QR Code matrix (29×29) |
+| `local_147[14]`                       | Random Salt string                |
+| `local_138`, `local_130`, `local_128` | Hexadecimal character table       |
+| `local_118[38]`                       | User input buffer                 |
+| `local_4b4`, `local_4b0`              | Loop counters                     |
 
 ---
 
-## 🔹 بخش ۲: محافظت از Stack (Stack Canary)
+### 🔹 Section 2: Stack Protection (Stack Canary)
 
 ```c
 local_10 = *(long *)(in_FS_OFFSET + 0x28);
 ```
 
-برای جلوگیری از حملات **buffer overflow** استفاده می‌شود. در پایان بررسی می‌شود.
+This line sets up a **stack canary** for preventing **buffer overflow attacks**. It will be checked at the end of the function.
 
 ---
 
-## 🔹 بخش ۳: ساخت جدول کاراکترهای Hex
+### 🔹 Section 3: Creating the Hex Character Table
 
 ```c
 local_138 = 0x3736353433323130;
@@ -99,7 +93,7 @@ local_130 = 0x6665646362613938;
 local_128 = 0;
 ```
 
-با در نظر گرفتن Little-Endian:
+Considering the **Little-Endian** format, this creates the following table:
 
 ```
 hex_chars = "0123456789abcdef"
@@ -107,16 +101,16 @@ hex_chars = "0123456789abcdef"
 
 ---
 
-## 🔹 بخش ۴: تولید Salt تصادفی
+### 🔹 Section 4: Generating a Random Salt
 
 ```c
 tVar2 = time((time_t *)0x0);
 srand((uint)tVar2);
 ```
 
-فرض می‌کنیم `time()` مقدار `1727654400` برگرداند. سپس با این مقدار RNG را seed می‌کند.
+Assume `time()` returns `1727654400`. This value seeds the random number generator (RNG).
 
-حلقه تولید Salt:
+Salt generation loop:
 
 ```c
 for (local_4b4 = 0; local_4b4 < 0xe; local_4b4++) {
@@ -126,55 +120,55 @@ for (local_4b4 = 0; local_4b4 < 0xe; local_4b4++) {
 local_139 = 0;
 ```
 
-### 🔢 نتیجه شبیه‌سازی Salt
+### 🔢 Simulated Salt Output
 
-| i  | rand()     | %16 | کاراکتر |
-| -- | ---------- | --- | ------- |
-| 0  | 846930886  | 6   | '6'     |
-| 1  | 1681692777 | 9   | '9'     |
-| 2  | 1714636915 | 3   | '3'     |
-| 3  | 1957747793 | 1   | '1'     |
-| 4  | 424238335  | 15  | 'f'     |
-| 5  | 719885386  | 10  | 'a'     |
-| 6  | 1649760492 | 12  | 'c'     |
-| 7  | 596516649  | 9   | '9'     |
-| 8  | 1189641421 | 13  | 'd'     |
-| 9  | 1025202362 | 10  | 'a'     |
-| 10 | 1350490027 | 11  | 'b'     |
-| 11 | 783368690  | 2   | '2'     |
-| 12 | 1495764371 | 3   | '3'     |
-| 13 | 1894536430 | 14  | 'e'     |
+| i  | rand()     | %16 | Character |
+| -- | ---------- | --- | --------- |
+| 0  | 846930886  | 6   | '6'       |
+| 1  | 1681692777 | 9   | '9'       |
+| 2  | 1714636915 | 3   | '3'       |
+| 3  | 1957747793 | 1   | '1'       |
+| 4  | 424238335  | 15  | 'f'       |
+| 5  | 719885386  | 10  | 'a'       |
+| 6  | 1649760492 | 12  | 'c'       |
+| 7  | 596516649  | 9   | '9'       |
+| 8  | 1189641421 | 13  | 'd'       |
+| 9  | 1025202362 | 10  | 'a'       |
+| 10 | 1350490027 | 11  | 'b'       |
+| 11 | 783368690  | 2   | '2'       |
+| 12 | 1495764371 | 3   | '3'       |
+| 13 | 1894536430 | 14  | 'e'       |
 
-📦 **Salt نهایی:** `6931fac9dab23e`
+📦 **Final Salt:** `6931fac9dab23e`
 
----
+<img width="1717" height="990" alt="{886DB25D-5534-45D4-B27A-5A752215EEF4}" src="https://github.com/user-attachments/assets/8e327dd5-1fe8-4800-bef8-e3a9bb19d47a" />
 
-## 🔹 بخش ۵: تخصیص حافظه
+  ## 🔹 Section 5: Memory Allocation
 
 ```c
 __ptr = malloc(0xe9);
 ```
 
-🔸 `0xE9 = 233 بایت`
+🔸 `0xE9 = 233 bytes`
 
-دلیل: `29 × 8 = 232` کاراکتر هگز + ۱ بایت برای Null Terminator.
+Reason: `29 × 8 = 232` hex characters + 1 byte for the null terminator.
 
 ---
 
-## 🔹 بخش ۶: دریافت ورودی کاربر
+## 🔹 Section 6: Getting User Input
 
 ```c
 printf("Enter secret text: ");
 pcVar4 = fgets(local_118, 0x100, stdin);
 ```
 
-ورودی کاربر:
+User input:
 
 ```
 flag\n
 ```
 
-پس از ورود:
+After reading:
 
 ```
 local_118 = { 'f', 'l', 'a', 'g', '\n', '\0' }
@@ -182,14 +176,14 @@ local_118 = { 'f', 'l', 'a', 'g', '\n', '\0' }
 
 ---
 
-## 🔹 بخش ۷: حذف کاراکتر Newline
+## 🔹 Section 7: Removing the Newline Character
 
 ```c
 sVar5 = strcspn(local_118, "\n");
 local_118[sVar5] = '\0';
 ```
 
-نتیجه:
+Result:
 
 ```
 local_118 = "flag"
@@ -197,13 +191,13 @@ local_118 = "flag"
 
 ---
 
-## 🔹 بخش ۸: بررسی خالی بودن ورودی
+## 🔹 Section 8: Checking for Empty Input
 
-اگر ورودی خالی باشد برنامه متوقف می‌شود — در این مثال ادامه می‌دهد.
+If the input is empty, the program terminates — in this case, it continues.
 
 ---
 
-## 🔹 بخش ۹: Padding تا طول ۳۸ کاراکتر
+## 🔹 Section 9: Padding to 38 Characters
 
 ```c
 sVar5 = strlen(local_118);  // sVar5 = 4
@@ -218,33 +212,33 @@ if (local_4b0 < 0x26) {
 }
 ```
 
-نتیجه نهایی:
+Final Result:
 
 ```
 flag+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*+
 ```
 
-طول: ۳۸ کاراکتر ✅
+Length: 38 characters ✅
 
 ---
 
-## 🔹 بخش ۱۰: تبدیل رشته به QR Code
+## 🔹 Section 10: Convert String to QR Code
 
 ```c
 FUN_00101329(local_118, local_498);
 ```
 
-رشته را به **ماتریس QR 29×29** تبدیل می‌کند.
+This function converts the **input string** into a **29×29 QR matrix**.
 
 ---
 
-## 🔹 بخش ۱۱: تبدیل QR به Hexadecimal
+## 🔹 Section 11: Convert QR to Hexadecimal
 
 ```c
 FUN_00101454(local_498, __ptr);
 ```
 
-مثال خروجی:
+Example output:
 
 ```
 __ptr = "feeb53f882e2f208ba..."
@@ -252,13 +246,13 @@ __ptr = "feeb53f882e2f208ba..."
 
 ---
 
-## 🔹 بخش ۱۲: چاپ خروجی نهایی
+## 🔹 Section 12: Print Final Output
 
 ```c
 printf("Ciphertext: \n%s%s\n", local_147, __ptr);
 ```
 
-📜 خروجی:
+📜 Output:
 
 ```
 Ciphertext:
@@ -272,7 +266,7 @@ Ciphertext:
 
 ---
 
-## 🔹 بخش ۱۳: آزادسازی حافظه و بررسی Stack Canary
+## 🔹 Section 13: Free Memory & Check Stack Canary
 
 ```c
 free(__ptr);
@@ -281,19 +275,19 @@ return 0;
 
 ---
 
-## ✅ خلاصه عملکرد تابع (با مثال `flag`)
+## ✅ Function Summary (Example with `flag`)
 
-| مرحله | توضیح               | نتیجه                                 |
-| ----- | ------------------- | ------------------------------------- |
-| ۱     | تولید Salt          | `6931fac9dab23e`                      |
-| ۲     | دریافت ورودی        | `flag`                                |
-| ۳     | حذف \n              | `flag`                                |
-| ۴     | پدینگ تا ۳۸ کاراکتر | `flag+-*+-*+-*+...`                   |
-| ۵     | ساخت QR Code        | ماتریس ۲۹×۲۹                          |
-| ۶     | تبدیل به Hex        | `feeb53f882e2f208ba...`               |
-| ۷     | ترکیب Salt + QR     | `6931fac9dab23efeeb53f882e2f208ba...` |
+| Step | Description           | Result                                |
+| ---- | --------------------- | ------------------------------------- |
+| 1    | Generate Salt         | `6931fac9dab23e`                      |
+| 2    | Read Input            | `flag`                                |
+| 3    | Remove `\n`           | `flag`                                |
+| 4    | Pad to 38 chars       | `flag+-*+-*+-*+...`                   |
+| 5    | Build QR Code         | 29×29 Matrix                          |
+| 6    | Convert to Hex        | `feeb53f882e2f208ba...`               |
+| 7    | Combine Salt + QR Hex | `6931fac9dab23efeeb53f882e2f208ba...` |
 
-📦 **خروجی نهایی:**
+📦 **Final Output:**
 
 ```
 6931fac9dab23efeeb53f882e2f208ba...
@@ -301,11 +295,8 @@ return 0;
 
 ---
 
-
-
-
-
 # FUN_00101329
+
 ```c
 1   void FUN_00101329(char *param_1, undefined1 *param_2)
 2   {
@@ -340,59 +331,60 @@ return 0;
 31  }
 ```
 
-ورودی مثال ما:
+Example input:
 
 ```c
 input_string = "flag+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*+"
 length = 38 characters
 ```
 
-خطوط 3-9: تعریف متغیرها
+Lines 3–9: Variable definitions
 
 ```c
-int iVar1;           // متغیر موقت برای محاسبه index
-uint uVar2;          // برای ذخیره width ماتریس QR
-QRcode *pQVar3;      // pointer به ساختار QRcode
-long in_FS_OFFSET;   // offset برای stack canary
-int local_34;        // counter سطرها (row)
-int local_30;        // counter ستون‌ها (column)
-long local_10;       // مقدار canary
+int iVar1;           // Temporary variable for index calculation
+uint uVar2;          // Stores QR matrix width
+QRcode *pQVar3;      // Pointer to QRcode structure
+long in_FS_OFFSET;   // Stack canary offset
+int local_34;        // Row counter
+int local_30;        // Column counter
+long local_10;       // Canary value
 ```
 
-توضیح هر متغیر:
+### Explanation of Variables:
 
-** QRcode *pQVar3: **
+**QRcode *pQVar3:**
 
-این یک pointer به ساختار زیر است:
+Pointer to the following structure:
 
 ```c
 typedef struct {
-    int version;        // نسخه QR (1 تا 40)
-    int width;          // عرض/ارتفاع ماتریس
-    unsigned char *data; // آرایه داده‌های QR
+    int version;         // QR version (1–40)
+    int width;           // Matrix width/height
+    unsigned char *data; // QR data array
 } QRcode;
 ```
 
-مثال:
+Example:
 
 ```c
-pQVar3->version = 3      // نسخه 3
-pQVar3->width = 29       // ماتریس 29×29
+pQVar3->version = 3      // Version 3
+pQVar3->width = 29       // 29x29 matrix
 pQVar3->data = [841 bytes]  // 29×29 = 841
 ```
 
 **in_FS_OFFSET:**
 
-این مقدار مربوط به Stack Canary است که برای امنیت استفاده می‌شود.
+This value refers to the Stack Canary used for protection.
 
+---
 
-خط 11: Stack Canary Initialization
+### Line 11: Stack Canary Initialization
 
 ```c
 local_10 = *(long *)(in_FS_OFFSET + 0x28);
 ```
 
-توضیح کامل:
+#### Explanation:
 
 Memory Layout:
 
@@ -400,34 +392,31 @@ Memory Layout:
 ┌────────────────────┐
 │ FS Segment         │
 │ …                  │
-│ +0x28: canary      │ ← یک مقدار تصادفی
+│ +0x28: canary      │ ← Random value
 │ …                  │
 └────────────────────┘
 ```
 
-`local_10` = این مقدار را کپی می‌کند.
+`local_10` copies this value.
 
-**هدف:** در پایان تابع، این مقدار چک می‌شود. اگر تغییر کرده باشد یعنی buffer overflow رخ داده!
-
----
-
-خط 12: تولید QR Code ⭐ **مهمترین خط**
+**Purpose:** At the end of the function, this value is checked. If it has changed, it indicates a buffer overflow!
+Line 12: QR Code Generation ⭐ **Most Important Line**
 
 ```c
 pQVar3 = QRcode_encodeString(param_1, 0, QR_ECLEVEL_L, QR_MODE_8, 1);
 ```
 
-تحلیل هر پارامتر:
+### Parameter Analysis
 
-**پارامتر 1:** `param_1` (ورودی)
+**Parameter 1:** `param_1` (Input String)
 
 ```c
 "flag+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*+"
 ```
 
-**پارامتر 2:** `0` (Version - Auto)
+**Parameter 2:** `0` (Version - Auto)
 
-QR Code نسخه‌های مختلفی دارد:
+QR Codes have multiple versions:
 
 | Version | Size    | Max Characters (Alphanumeric) |
 | ------- | ------- | ----------------------------- |
@@ -438,23 +427,25 @@ QR Code نسخه‌های مختلفی دارد:
 | …       | …       | …                             |
 | 40      | 177×177 | 4296                          |
 
-فرمول Size:
+Formula for size:
 
 ```
 Size = 17 + 4 × Version
 ```
 
-مثال:
+Examples:
 
 * Version 1: 17 + 4×1 = 21
 * Version 2: 17 + 4×2 = 25
 * Version 3: 17 + 4×3 = 29
 
-برای 38 کاراکتر ما، Version 3 (29×29) انتخاب می‌شود.
+For a 38-character string, Version 3 (29×29) is selected.
 
-**پارامتر 3:** `QR_ECLEVEL_L` (Error Correction Level)
+---
 
-چهار سطح تصحیح خطا وجود دارد:
+**Parameter 3:** `QR_ECLEVEL_L` (Error Correction Level)
+
+There are four error correction levels:
 
 | Level        | Recovery Capacity | Data Capacity | Use Case           |
 | ------------ | ----------------- | ------------- | ------------------ |
@@ -463,117 +454,103 @@ Size = 17 + 4 × Version
 | Q (Quartile) | ~25%              | Medium        | Outdoor            |
 | H (High)     | ~30%              | Low           | Damaged/dirty      |
 
-مثال عملی:
+**Example:**
 
-فرض کنیم QR Code دارای 100 بایت داده است:
+Suppose the QR Code contains 100 bytes of data:
 
-* Level L: اگر 7 بایت آسیب ببیند، قابل ترمیم است
-* Level H: اگر 30 بایت آسیب ببیند، قابل ترمیم است
+* Level L: can recover if 7 bytes are damaged
+* Level H: can recover if 30 bytes are damaged
 
-اما:
+However:
 
-* Level L: می‌تواند 100 بایت داده ذخیره کند
-* Level H: فقط می‌تواند ~70 بایت داده ذخیره کند
+* Level L: can store 100 bytes of data
+* Level H: can store only ~70 bytes of data
 
-**پارامتر 4:** `QR_MODE_8` (Encoding Mode)
+---
 
-چند حالت کدگذاری وجود دارد:
+**Parameter 4:** `QR_MODE_8` (Encoding Mode)
+
+Different encoding modes exist:
 
 | Mode         | Description       | Bits per Character | Example  |
 | ------------ | ----------------- | ------------------ | -------- |
-| Numeric      | فقط اعداد 0-9     | 3.33 bits          | "123456" |
-| Alphanumeric | 0-9, A-Z, symbols | 5.5 bits           | "HELLO"  |
-| Byte (8-bit) | هر بایت           | 8 bits             | "flag±*" |
-| Kanji        | کاراکترهای ژاپنی  | 13 bits            | "日本"     |
+| Numeric      | Only digits 0–9   | 3.33 bits          | "123456" |
+| Alphanumeric | 0–9, A–Z, symbols | 5.5 bits           | "HELLO"  |
+| Byte (8-bit) | Any 8-bit char    | 8 bits             | "flag±*" |
+| Kanji        | Japanese chars    | 13 bits            | "日本"     |
 
-چرا **MODE_8**؟
+Why **MODE_8**?
 
 ```c
 "flag+-*+-*..."
  ↑    ↑↑
- حروف  کاراکترهای خاص
+ letters special chars
 ```
 
-نیاز به Byte mode داریم چون کاراکترهای ASCII معمولی + ویژه داریم.
+We need Byte mode because it contains normal ASCII and special characters.
 
-**پارامتر 5:** `1` (Case Sensitive)
+---
+
+**Parameter 5:** `1` (Case Sensitive)
 
 ```c
-1 = Case Sensitive (حساس به حروف بزرگ/کوچک)
+1 = Case Sensitive
 0 = Case Insensitive
 ```
 
-مثال:
+Example:
 
-* `"Flag"` ≠ `"flag"`  (با 1)
-* `"Flag"` = `"flag"`  (با 0)
+* `"Flag" ≠ "flag"` (when 1)
+* `"Flag" = "flag"` (when 0)
 
+---
 
-
-
-جریان درونی QRcode_encodeString:
+### Internal Flow of `QRcode_encodeString`
 
 ```
 ┌────────────────────────────────────────┐
-
-│ 1. تحلیل ورودی و انتخاب Mode │
-
-│ “flag±*…” → Byte Mode │
-
+│ 1. Analyze input & select Mode          │
+│ “flag±*…” → Byte Mode                  │
 └────────────────────────────────────────┘
 
 ↓
 
 ┌────────────────────────────────────────┐
-
-│ 2. محاسبه Version مناسب │
-
-│ 38 chars → Version 3 (29×29) │
-
+│ 2. Determine appropriate Version        │
+│ 38 chars → Version 3 (29×29)           │
 └────────────────────────────────────────┘
 
 ↓
 
 ┌────────────────────────────────────────┐
-
-│ 3. تبدیل به Binary Stream │
-
-│ “flag” → 01100110 01101100… │
-
+│ 3. Convert to Binary Stream             │
+│ “flag” → 01100110 01101100…            │
 └────────────────────────────────────────┘
 
 ↓
 
 ┌────────────────────────────────────────┐
-
-│ 4. افزودن Error Correction Codes │
-
-│ Reed-Solomon Algorithm │
-
+│ 4. Add Error Correction Codes           │
+│ Reed-Solomon Algorithm                 │
 └────────────────────────────────────────┘
 
 ↓
 
 ┌────────────────────────────────────────┐
-
-│ 5. قرار دادن در ماتریس │
-
-│ Masking, Patterns, etc. │
-
+│ 5. Place into Matrix                   │
+│ Masking, Patterns, etc.                │
 └────────────────────────────────────────┘
 
 ↓
 
 ┌────────────────────────────────────────┐
-
-│ نتیجه: ماتریس 29×29 │
-
+│ Result: 29×29 Matrix                   │
 └────────────────────────────────────────┘
 ```
 
 ---
 
-خطوط 13-16: بررسی خطا
+### Lines 13–16: Error Checking
 
 ```c
 if (pQVar3 == (QRcode *)0x0) {
@@ -582,43 +559,40 @@ if (pQVar3 == (QRcode *)0x0) {
 }
 ```
 
-**چه زمانی NULL برمی‌گردد؟**
+**When does it return NULL?**
 
-* حافظه کافی نیست (malloc failed)
-* ورودی خیلی بزرگ است (بیش از Version 40)
-* کاراکترهای نامعتبر در ورودی
+* Not enough memory (malloc failed)
+* Input too large (exceeds Version 40)
+* Invalid characters in input
 
-**مثال:**
+**Example:**
 
 ```c
-// ورودی 3000 کاراکتری
+// 3000-character input
 char huge[3000];
-QRcode_encodeString(huge, ...) → NULL (خیلی بزرگ!)
+QRcode_encodeString(huge, ...) → NULL (too large!)
 ```
-
----
-
-خط 17: ذخیره Width
+Line 17: Store Width
 
 ```c
 uVar2 = pQVar3->width;
 ```
 
-**برای مثال ما:**
+**For our example:**
 
 ```c
-uVar2 = 29  // ماتریس 29×29
+uVar2 = 29  // 29×29 matrix
 ```
 
 ---
 
-خط 18: پاک کردن آرایه خروجی
+Line 18: Clear output array
 
 ```c
 memset(param_2, 0, (long)(int)uVar2 * (long)(int)uVar2);
 ```
 
-**محاسبه دقیق:**
+**Exact calculation:**
 
 ```c
 width = 29
@@ -627,19 +601,23 @@ size = 29 × 29 = 841 bytes
 memset(param_2, 0, 841)
 ```
 
-**عملیات:**
+**Operation:**
 
-قبل از memset:
+Before memset:
 
+```
 param_2 = [garbage, garbage, garbage, …]
+```
 
-بعد از memset:
+After memset:
 
-param_2 = [0, 0, 0, 0, 0, …, 0] (841 zero)
+```
+param_2 = [0, 0, 0, 0, 0, …, 0] (841 zeros)
+```
 
+---
 
-
-خطوط 19-25: حلقه‌های اصلی ⭐
+Lines 19–25: Main Loops ⭐
 
 ```c
 for (local_34 = 0; local_34 < (int)pQVar3->width; local_34 = local_34 + 1) {
@@ -651,38 +629,39 @@ for (local_34 = 0; local_34 < (int)pQVar3->width; local_34 = local_34 + 1) {
 }
 ```
 
-شبیه‌سازی کامل با ماتریس واقعی:
+Full simulation with a real matrix example:
 
-فرض کنیم QR کوچک 5×5 داریم:
+Assume we have a small 5×5 QR code:
 
 QR Matrix (5×5):
 
-Col 0 1 2 3 4
+| Col   | 0 | 1 | 2 | 3 | 4 |
+| ----- | - | - | - | - | - |
+| **0** | 1 | 1 | 1 | 0 | 0 |
+| **1** | 1 | 0 | 0 | 1 | 1 |
+| **2** | 1 | 0 | 1 | 0 | 1 |
+| **3** | 0 | 1 | 1 | 1 | 0 |
+| **4** | 0 | 1 | 0 | 0 | 1 |
 
-Row ┌─────────────────┐
+Representation in `pQVar3->data`:
 
-0 │ 1 1 1 0 0 │
+```
+Index:  0  1  2  3  4   5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Value:  1  1  1  0  0   1  0  0  1  1   1  0  1  0  1   0  1  1  1  0   0  1  0  0  1
 
-1 │ 1 0 0 1 1 │
+Row:   |← Row 0 →| |← Row 1 →| |← Row 2 →| |← Row 3 →| |← Row 4 →|
+```
 
-2 │ 1 0 1 0 1 │
+Iteration breakdown:
 
-3 │ 0 1 1 1 0 │
+```
+Iteration 1: row = 0, col = 0
+```
+Step-by-step Iteration of the Loops
 
-4 │ 0 1 0 0 1 │
+---
 
-└─────────────────┘
-
-نمایش در pQVar3->data:
-
-Index: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-
-Value: 1 1 1 0 0 1 0 0 1 1 1 0 1 0 1 0 1 1 1 0 0 1 0 0 1
-
-Row: |← Row 0 →| |← Row 1 →| |← Row 2 →| |← Row 3 →| |← Row 4 →|
-
-حلقه iteration by iteration:
-Iteration 1: row=0, col=0
+### Iteration 1: row=0, col=0
 
 ```c
 local_34 = 0  (row)
@@ -697,17 +676,17 @@ param_2[0] = pQVar3->data[0] & 1
 
 param_2:
 
+```
 ┌───┬───┬───┬───┬───┐
-
 │ 1 │ ? │ ? │ ? │ ? │
-
 └───┴───┴───┴───┴───┘
-
 ↑
-
 filled
+```
 
-Iteration 2: row=0, col=1
+---
+
+### Iteration 2: row=0, col=1
 
 ```c
 local_34 = 0
@@ -720,7 +699,9 @@ param_2[1] = pQVar3->data[1] & 1
            = 1
 ```
 
-Iteration 3-5: row=0, col=2,3,4
+---
+
+### Iteration 3–5: row=0, col=2..4
 
 ```c
 param_2[2] = data[2] & 1 = 1
@@ -728,19 +709,18 @@ param_2[3] = data[3] & 1 = 0
 param_2[4] = data[4] & 1 = 0
 ```
 
-بعد از تمام شدن سطر 0:
+After completing Row 0:
 
-param_2:
-
+```
 ┌───┬───┬───┬───┬───┬───┐
-
 │ 1 │ 1 │ 1 │ 0 │ 0 │ ? │ …
-
 └───┴───┴───┴───┴───┴───┘
-
 └─────Row 0─────┘
+```
 
-Iteration 6: row=1, col=0
+---
+
+### Iteration 6: row=1, col=0
 
 ```c
 local_34 = 1
@@ -753,7 +733,9 @@ param_2[5] = pQVar3->data[5] & 1
            = 1
 ```
 
-ادامه تا پایان…
+---
+
+### Iteration Table
 
 ```c
 Iteration  Row Col  Index  Value
@@ -769,105 +751,118 @@ Iteration  Row Col  Index  Value
     9       1   3     8      1
    10       1   4     9      1
    11       2   0    10      1
-    ...
+   12       2   1    11      0
+   13       2   2    12      1
+   14       2   3    13      0
+   15       2   4    14      1
+   16       3   0    15      0
+   17       3   1    16      1
+   18       3   2    17      1
+   19       3   3    18      1
+   20       3   4    19      0
+   21       4   0    20      0
+   22       4   1    21      1
+   23       4   2    22      0
+   24       4   3    23      0
    25       4   4    24      1
 ```
 
-نتیجه نهایی param_2:
+---
+
+### Final Result in `param_2`
+
 
 <img width="1202" height="153" alt="{3884F1BC-8247-414E-BB11-69493E54142F}" src="https://github.com/user-attachments/assets/6edff912-139c-401b-be84-068e90ab6030" />
 
 
-عملیات & 1 چیست؟
-pQVar3->data[i] می‌تواند مقادیر مختلفی داشته باشد:
+  What does the `& 1` operation do?
 
-مثال 1:
+`pQVar3->data[i]` can hold different byte values. The expression `value & 0x01` extracts the least-significant bit (LSB). Examples:
 
-data[i] = 0x00 (0000 0000)
+Example 1:
 
-& 0x01 (0000 0001)
+```
+data[i] = 0x00  // 0000 0000
+& 0x01 = 0000 0001
+-------------------
+0x00 -> 0 (white)
+```
 
-─────────────────
+Example 2:
 
-0x00 (0000 0000) → 0 (white)
+```
+data[i] = 0x01  // 0000 0001
+& 0x01 = 0000 0001
+-------------------
+0x01 -> 1 (black)
+```
 
-مثال 2:
+Example 3:
 
-data[i] = 0x01 (0000 0001)
+```
+data[i] = 0xFF  // 1111 1111
+& 0x01 = 0000 0001
+-------------------
+0x01 -> 1 (black)
+```
 
-& 0x01 (0000 0001)
+Conclusion: only the least-significant bit (LSB) is extracted.
 
-─────────────────
+---
 
-0x01 (0000 0001) → 1 (black)
+For a real 29×29 matrix:
 
-مثال 3:
-
-data[i] = 0xFF (1111 1111)
-
-& 0x01 (0000 0001)
-
-─────────────────
-
-0x01 (0000 0001) → 1 (black)
-
-نتیجه: فقط بیت کم‌ارزش (LSB) استخراج می‌شود.
-برای ماتریس 29×29 واقعی:
-
-```c
+```
 Total iterations = 29 × 29 = 841
 
 Row  0: param_2[0..28]   = 29 bytes
 Row  1: param_2[29..57]  = 29 bytes
 Row  2: param_2[58..86]  = 29 bytes
 ...
-Row 28: param_2[812..840]= 29 bytes
+Row 28: param_2[812..840] = 29 bytes
 ```
 
-**Formula:**
+**Index formula:**
 
 ```python
 def get_pixel(row, col):
     index = row * 29 + col
     return param_2[index]
 
-# مثال:
+# Example:
 pixel_at_10_15 = param_2[10 * 29 + 15]
                 = param_2[305]
 ```
 
 ---
 
-خط 26: آزادسازی حافظه
+Line 26: Freeing memory
 
 ```c
 QRcode_free(pQVar3);
 ```
 
-**چرا لازم است؟**
+Why is this necessary?
 
 ```c
 QRcode_encodeString() {
     QRcode *qr = malloc(sizeof(QRcode));
     qr->data = malloc(width * width);
     ...
-    return qr;  // حافظه allocated شده برگشت داده می‌شود
+    return qr;  // allocated memory is returned
 }
 ```
 
-اگر `QRcode_free` فراخوانی نشود → **Memory Leak!**
+If `QRcode_free` is not called → **Memory leak!**
 
-بدون free:
+Example leak accounting:
 
-* Iteration 1: 841 bytes leaked
-* Iteration 2: 841 bytes leaked
-* Iteration 3: 841 bytes leaked
-* …
-* After 1000 calls: 841 KB leaked!
+* Each call leaks 841 bytes (for a 29×29 matrix)
+* After 1000 calls: 841 × 1000 = 841,000 bytes ≈ 821 KB leaked
 
 ---
 
-خطوط 27-29: Stack Canary Check
+Lines 27–29: Stack canary check
 
 ```c
 if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
@@ -875,34 +870,35 @@ if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
 }
 ```
 
-چک می‌کند:
+What it checks:
 
-* ابتدای تابع: local_10 = 0xDEADBEEFCAFEBABE (مقدار تصادفی)
-* انتهای تابع: canary = 0xDEADBEEFCAFEBABE ؟
+* At function start: `local_10` is set to the stack canary (a guard value)
+* At function end: it compares `local_10` to the stored canary value again
 
-اگر YES → همه چیز OK
-اگر NO → Buffer overflow! → CRASH
+If they match → OK
+If they differ → possible buffer overflow detected → `__stack_chk_fail()` is called (program aborts)
 
-**مثال Buffer Overflow:**
+(This protects the function's stack frame from being corrupted by stack-based buffer overflows.)
+
+
+Buffer Overflow example
 
 ```c
 char buffer[10];
-strcpy(buffer, "این رشته خیلی بلند است!");  // Overflow!
+strcpy(buffer, "This string is way too long!");  // Overflow!
 ```
 
-* canary آسیب می‌بیند
-* `__stack_chk_fail()` فراخوانی می‌شود
-* برنامه crash می‌کند
+* The canary is corrupted
+* `__stack_chk_fail()` is called
+* The program crashes
 
 ---
 
+# Step 3: Convert to Hex (function FUN_00101454)
 
+This is the heart of the encoding routine!
 
-# Step 3: تبدیل به Hex (تابع FUN_00101454)
-
-این قلب اصلی رمزگذاری است!
-
-## کد کامل
+## Full code
 
 ```c
 void FUN_00101454(byte *qr_matrix, char *hex_output) {
@@ -912,14 +908,14 @@ void FUN_00101454(byte *qr_matrix, char *hex_output) {
     int bit_index;
     
     for (row = 0; row < 29; row = row + 1) {
-        uVar1 = 0;  // جمع‌کننده 8-bit
+        uVar1 = 0;  // 8-bit accumulator
         
         for (bit_index = 0; bit_index < 8; bit_index = bit_index + 1) {
             if (bit_index < 5) {
-                bVar2 = qr_matrix[bit_index * 29 + row];  // توجه: transpose!
+                bVar2 = qr_matrix[bit_index * 29 + row];  // note: transpose!
             }
             else {
-                bVar2 = 0;  // padding با 0
+                bVar2 = 0;  // padding with 0
             }
             uVar1 = uVar1 << 1 | (uint)bVar2;
         }
@@ -931,27 +927,27 @@ void FUN_00101454(byte *qr_matrix, char *hex_output) {
 }
 ```
 
-## درک عمیق الگوریتم
+## Deep understanding of the algorithm
 
-### نکته کلیدی: Transpose!
+### Key point: Transpose!
+
+The access pattern:
 
 ```c
 qr_matrix[bit_index * 29 + row]
 ```
 
-این ستون‌ها را می‌خواند، نه سطرها!
+reads columns, not rows — it is a transpose of the usual row-major indexing.
 
-معادل:
+Equivalent in Python-style notation:
 
 ```python
-value = qr_matrix[column][row]  # transpose of normal indexing
+value = qr_matrix[column][row]  # transposed indexing
 ```
 
-## شبیه‌سازی کامل با مثال
+## Full simulation with an example
 
-فرض کنیم بخش کوچکی از QR:
-
-QR Matrix (29×29):
+Assume a small section of the QR matrix (29×29, shown here as first 5 columns):
 
 ```
 Col0 Col1 Col2 Col3 Col4
@@ -963,7 +959,7 @@ Row4: 1 1 0 0 1
 ...
 ```
 
-### پردازش Row 0
+### Processing row 0
 
 ```python
 row = 0
@@ -993,14 +989,14 @@ uVar1 = (0b00001011 << 1) | 0 = 0b00010110
 uVar1 = 0b10110000
 ```
 
-### خروجی
+### Output
 
 ```c
 sprintf(hex_output + 0*2, "%02x", 0xB0);
 // hex_output[0..1] = "b0"
 ```
 
-### نمودار Bit Shifting
+### Bit shifting diagram
 
 ```
 Initial: 00000000
@@ -1015,9 +1011,15 @@ Shift+OR 0: 10110000 (padding)
 Final: 0xB0
 ```
 
-## مثال کامل با 3 سطر
+Notes:
 
-QR Matrix:
+* The function processes each row by reading the first 5 columns (transposed) and packs those bits into the high bits of an 8-bit value, then pads with zeros for the remaining bits.
+* The result for each row is written as two hex characters into `hex_output` (so 29 rows -> 58 hex chars + null terminator at index 58).
+
+
+## Complete Example (3 rows)
+
+**QR Matrix (first 5 columns shown):**
 
 ```
 Col0 Col1 Col2 Col3 Col4
@@ -1026,59 +1028,67 @@ Row1: 0 1 0 1 1 → 0x58
 Row2: 1 1 1 0 0 → 0xE0
 ```
 
-خروجی:
+**Output:**
 
 ```c
 hex_output = "b058e0..."
 ```
 
-## چرا Transpose؟
+---
+
+## Why Transpose?
 
 * Normal row-major: [Row0_Col0, Row0_Col1, …]
-* This algorithm: [Row0_Col0, Row1_Col0, …, Row28_Col0]
+* This algorithm reads: [Row0_Col0, Row1_Col0, …, Row28_Col0] (i.e. columns)
 
-**دلیل احتمالی:**
+**Possible reasons:**
 
-* افزایش پیچیدگی reverse engineering
-* ایجاد dependency بین سطرهای مختلف
-* الگوی غیرمعمول داده
+* Increase reverse-engineering difficulty
+* Create dependency across different rows
+* Produce an unusual data pattern
 
-## محاسبه دقیق Indices
+---
+
+## Exact index calculation
 
 ```c
 index = bit_index * 29 + row
 ```
 
-جدول indices برای row=0:
+Index table for `row = 0`:
 
-| bit_index | محاسبه | Index | موقعیت     |
-| --------- | ------ | ----- | ---------- |
-| 0         | 0*29+0 | 0     | Row0, Col0 |
-| 1         | 1*29+0 | 29    | Row0, Col1 |
-| 2         | 2*29+0 | 58    | Row0, Col2 |
-| 3         | 3*29+0 | 87    | Row0, Col3 |
-| 4         | 4*29+0 | 116   | Row0, Col4 |
-| 5         | -      | -     | Padding 0  |
-| 6         | -      | -     | Padding 0  |
-| 7         | -      | -     | Padding 0  |
+| bit_index | calculation | Index | Position   |
+| --------- | ----------- | ----- | ---------- |
+| 0         | 0*29 + 0    | 0     | Row0, Col0 |
+| 1         | 1*29 + 0    | 29    | Row0, Col1 |
+| 2         | 2*29 + 0    | 58    | Row0, Col2 |
+| 3         | 3*29 + 0    | 87    | Row0, Col3 |
+| 4         | 4*29 + 0    | 116   | Row0, Col4 |
+| 5         | -           | -     | Padding 0  |
+| 6         | -           | -     | Padding 0  |
+| 7         | -           | -     | Padding 0  |
 
-```
+---
 
-### تست با داده واقعی
-- فقط 5 ستون اول استفاده می‌شود
-- Every row produces: 0b10110000 = 0xB0
-- Output: 29 repetitions of “b0” → 58 chars
+### Test with real data
 
-## نکات مهم
-1. فقط 5 ستون اول استفاده می‌شود (145 پیکسل از 841)
-2. 3 Bit Padding: [Col0..Col4, 0,0,0]
-3. Big-Endian Bit Order: اولین bit خوانده شده → MSB
+* Only the first 5 columns are used (per row).
+* Every row produces: `0b10110000` → `0xB0` (in the toy example).
+* Output would be 29 repetitions of `"b0"` → 58 hex chars total.
 
-```
+---
 
-🔢 **Step 3: تبدیل به Hex (تابع FUN_00101454)**
+## Key observations
 
-این قلب اصلی رمزگذاری است!
+1. Only 5 out of 29 columns are used (145 pixels of 841 total).
+2. 3-bit padding: each byte = [Col0, Col1, Col2, Col3, Col4, 0, 0, 0].
+3. Big-endian bit order: the first bit read becomes the MSB of the byte.
+
+---
+
+### Step 3: Convert to Hex (function `FUN_00101454`)
+
+This is the encoding core.
 
 ```c
 void FUN_00101454(byte *qr_matrix, char *hex_output) {
@@ -1088,14 +1098,14 @@ void FUN_00101454(byte *qr_matrix, char *hex_output) {
     int bit_index;
     
     for (row = 0; row < 29; row = row + 1) {
-        uVar1 = 0;  // جمع‌کننده 8-bit
+        uVar1 = 0;  // 8-bit accumulator
         
         for (bit_index = 0; bit_index < 8; bit_index = bit_index + 1) {
             if (bit_index < 5) {
-                bVar2 = qr_matrix[bit_index * 29 + row];  // توجه: transpose!
+                bVar2 = qr_matrix[bit_index * 29 + row];  // transpose!
             }
             else {
-                bVar2 = 0;  // padding با 0
+                bVar2 = 0;  // padding with 0
             }
             uVar1 = uVar1 << 1 | (uint)bVar2;
         }
@@ -1109,43 +1119,21 @@ void FUN_00101454(byte *qr_matrix, char *hex_output) {
 
 ---
 
-### 🧠 درک عمیق الگوریتم
+### Deep understanding (recap)
 
-**نکته کلیدی: Transpose!**
-
-```c
-qr_matrix[bit_index * 29 + row]
-```
-
-این ستون‌ها را می‌خواند، نه سطرها!
-
-معادل در پایتون:
-
-```python
-value = qr_matrix[column][row]  # transpose of normal indexing
-```
-
-### 📐 شبیه‌سازی کامل با مثال
-
-فرض کنیم بخش کوچکی از QR:
-
-**QR Matrix (29×29):**
-
-|      | Col0 | Col1 | Col2 | Col3 | Col4 |
-| ---- | ---- | ---- | ---- | ---- | ---- |
-| Row0 | 1    | 0    | 1    | 1    | 0    |
-| Row1 | 0    | 1    | 0    | 1    | 1    |
-| Row2 | 1    | 1    | 1    | 0    | 0    |
-| Row3 | 0    | 0    | 1    | 1    | 1    |
-| Row4 | 1    | 1    | 0    | 0    | 1    |
-| ...  | ...  | ...  | ...  | ...  | ...  |
-
-هر ردیف با 8 بیت گرفته می‌شود: 5 بیت داده + 3 بیت padding.
+* The function processes each of the 29 rows by reading the first 5 columns **as columns** (transposed access), packing them into an 8-bit value, padding with three zero bits, and writing the resulting byte as two hex characters into `hex_output`.
+* Final `hex_output` length: 58 characters + null terminator.
 
 ---
 
+If you want, I can:
 
-### پردازش Row 0 (FUN_00101454)
+* produce a runnable Python/C example that takes a 29×29 `qr_matrix` and prints the `hex_output`,
+* visualize the 29×29 bit grid and the produced hex string, or
+* show how to reverse the encoding (recover the first 5 columns from the hex).
+
+
+### Processing Row 0 (FUN_00101454)
 
 ```python
 row = 0
@@ -1183,17 +1171,17 @@ uVar1 = (0b00101100 << 1) | 0 = 0b01011000
 bVar2 = 0
 uVar1 = (0b01011000 << 1) | 0 = 0b10110000
 
-# نتیجه نهایی
+# final result
 uVar1 = 0b10110000 = 0xB0
 ```
 
-### خروجی
+### Output
 
 ```c
 sprintf(hex_output + 0*2, "%02x", 0xB0); // hex_output[0..1] = "b0"
 ```
 
-### 🔄 نمودار Bit Shifting
+### 🔄 Bit Shifting Diagram
 
 ```
 Initial: 00000000
@@ -1209,142 +1197,151 @@ Shift+OR 0: 10110000 (padding)
 Final: 0xB0
 ```
 
-**ترتیب Bits:** MSB ← Col0, Col1, …, Col4, 0, 0, 0 → LSB
- مثال کامل با 3 سطر
+**Bit order:** MSB ← Col0, Col1, …, Col4, 0,0,0 → LSB
 
-QR Matrix:
+---
+
+## Full 3-row example
+
+QR Matrix (first 5 columns shown):
 
 Col0 Col1 Col2 Col3 Col4
 Row0: 1 0 1 1 0 → 0b10110000 → 0xB0
 Row1: 0 1 0 1 1 → 0b01011000 → 0x58
 Row2: 1 1 1 0 0 → 0b11100000 → 0xE0
 
-خروجی:
+Output:
+
+```
+hex_output = "b058e0..."
+```
 
 <img width="1039" height="543" alt="{55127C43-DDAF-425D-8D2E-29DED7CE1949}" src="https://github.com/user-attachments/assets/ff682dd7-250c-4686-bb8e-24e7795f00f9" />
 
+---
 
-🔢 محاسبه دقیق Indices
+## Exact index calculation
 
 ```c
 index = bit_index * 29 + row
 ```
 
-جدول indices برای row=0:
+Index table for `row = 0`:
 
-| bit_index | محاسبه | Index | موقعیت در ماتریس |
-| --------- | ------ | ----- | ---------------- |
-| 0         | 0×29+0 | 0     | Row0, Col0       |
-| 1         | 1×29+0 | 29    | Row0, Col1       |
-| 2         | 2×29+0 | 58    | Row0, Col2       |
-| 3         | 3×29+0 | 87    | Row0, Col3       |
-| 4         | 4×29+0 | 116   | Row0, Col4       |
-| 5         | -      | -     | Padding (0)      |
-| 6         | -      | -     | Padding (0)      |
-| 7         | -      | -     | Padding (0)      |
+| bit_index | calculation | Index | Position in matrix |
+| --------- | ----------- | ----- | ------------------ |
+| 0         | 0×29 + 0    | 0     | Row0, Col0         |
+| 1         | 1×29 + 0    | 29    | Row0, Col1         |
+| 2         | 2×29 + 0    | 58    | Row0, Col2         |
+| 3         | 3×29 + 0    | 87    | Row0, Col3         |
+| 4         | 4×29 + 0    | 116   | Row0, Col4         |
+| 5         | -           | -     | Padding (0)        |
+| 6         | -           | -     | Padding (0)        |
+| 7         | -           | -     | Padding (0)        |
 
-جدول indices برای row=5:
+Index table for `row = 5`:
 
-| bit_index | محاسبه | Index | موقعیت     |
-| --------- | ------ | ----- | ---------- |
-| 0         | 0×29+5 | 5     | Row5, Col0 |
-| 1         | 1×29+5 | 34    | Row5, Col1 |
-| 2         | 2×29+5 | 63    | Row5, Col2 |
-| 3         | 3×29+5 | 92    | Row5, Col3 |
-| 4         | 4×29+5 | 121   | Row5, Col4 |
+| bit_index | calculation | Index | Position   |
+| --------- | ----------- | ----- | ---------- |
+| 0         | 0×29 + 5    | 5     | Row5, Col0 |
+| 1         | 1×29 + 5    | 34    | Row5, Col1 |
+| 2         | 2×29 + 5    | 63    | Row5, Col2 |
+| 3         | 3×29 + 5    | 92    | Row5, Col3 |
+| 4         | 4×29 + 5    | 121   | Row5, Col4 |
 
-تست با داده واقعی:
-فرض کنیم 5 ستون اول تمام سطرها:
+---
 
-All rows have: Col0=1, Col1=0, Col2=1, Col3=1, Col4=0
+## Test with real data
 
-Every row produces: 0b10110000 = 0xB0
+Assume every row's first 5 columns are:
+Col0=1, Col1=0, Col2=1, Col3=1, Col4=0
 
-Output:
-"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0" (58 chars)
-└─ 29 repetitions of “b0”
+Every row produces: `0b10110000` = `0xB0`
+Output: 29 repetitions of "b0" (58 hex chars):
 
-⚠️ نکات مهم:
+```
+"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+```
 
-1. فقط 5 ستون اول استفاده می‌شود:
+(29 × "b0")
 
-   * 29×29 matrix → فقط 29×5 = 145 پیکسل
-   * Remaining 29×24 = 696 پیکسل نادیده گرفته می‌شوند!
-   * چرا؟ احتمالاً:
+---
 
-     * کاهش سایز خروجی (58 char vs 212 char)
-     * 5 ستون کافی برای encoding منحصر بفرد است
-     * بقیه QR برای error correction و metadata
+## Important notes
 
-2. 3 Bit Padding:
+1. Only the first 5 columns are used:
 
-   * 8 bits total: [Col0, Col1, Col2, Col3, Col4, 0, 0, 0]
-     ────┬─────────────────────────┬─────
-     Data (5 bits)  Padding (3 bits)
-   * این باعث می‌شود: هر byte همیشه bit های پایین صفر باشد
-   * Range مقادیر: 0x00-0xF8 (مضرب 8)
+   * 29×29 matrix → only 29×5 = 145 pixels used
+   * Remaining 29×24 = 696 pixels ignored
+   * Possible reasons: smaller output, those 5 columns suffice for unique encoding, rest reserved for error correction/metadata
 
-3. Big-Endian Bit Order:
+2. 3-bit padding:
+
+   * Each byte = [Col0, Col1, Col2, Col3, Col4, 0, 0, 0]
+   * Ensures lower 3 bits are always zero
+   * Byte values are multiples of 8 (0x00 to 0xF8)
+
+3. Big-endian bit order:
 
 ```c
 uVar1 = uVar1 << 1 | bVar2;
 ```
 
-* اولین bit خوانده شده → MSB می‌شود.
+* The first read bit becomes the MSB.
 
+---
 
-# رمزگذاری مرحله به مرحله برای ASIS{test}
+# Encoding walkthrough for `ASIS{test}`
 
-## 📌 ورودی اولیه
+## 📌 Initial input
 
 ```
 ASIS{test}
 ```
 
-* طول: 10 کاراکتر
+* Length: 10 characters
 
 ---
 
-## مرحله 1: Padding
+## Step 1: Padding
 
-طول ورودی: 10 کاراکتر
+Input length: 10
 
-* نیاز به padding: 28 کاراکتر (برای رسیدن به 38)
-* موقعیت شروع padding: 10
-* الگوی padding بر اساس `index mod 3`:
+* Need to reach total length 38 → add 28 padding characters
+* Padding pattern uses `index mod 3` starting at position 10:
 
   * 1 → `+`
   * 2 → `-`
   * 0 → `*`
 
-### مراحل
+Example sequence:
 
 ```
-موقعیت 10: 10 mod 3 = 1 → +
-موقعیت 11: 11 mod 3 = 2 → -
-موقعیت 12: 12 mod 3 = 0 → *
-موقعیت 13: 13 mod 3 = 1 → +
+position 10: 10 mod 3 = 1 → +
+position 11: 11 mod 3 = 2 → -
+position 12: 12 mod 3 = 0 → *
+position 13: 13 mod 3 = 1 → +
 ```
 
-... ادامه تا موقعیت 37
+... continue until position 37
 
-### خروجی بعد از Padding
+Output after padding:
 
 ```
 ASIS{test}+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*-
 ```
 
-* طول: 38 کاراکتر
+* Length: 38 characters
 
 ---
 
-## مرحله 2: تولید QR Code
+## Step 2: Generate QR Code
 
-* ورودی: `ASIS{test}+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*-`
-* تنظیمات: ECLevel=L, Mode=8-bit
-* خروجی: ماتریس باینری 29×29
+* Input: `ASIS{test}+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*-`
+* Settings: EC Level = L, Mode = 8-bit
+* Output: 29×29 binary matrix
 
-### نمونه ماتریس (5 سطر اول از 29)
+Sample first 5 rows (of 29):
 
 ```
 [1,1,1,1,1,1,1,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,0]
@@ -1354,141 +1351,146 @@ ASIS{test}+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*-
 [1,0,1,1,1,0,1,0,0,1,1,1,0,1,1,1,0,0,1,1,1,0,1,0,0,0,1,1,0]
 ```
 
-... (24 سطر دیگر)
+... (24 more rows)
 
 ---
 
-## مرحله 3: تبدیل به Hex (خواندن ستونی)
+If you'd like, I can:
 
-### نمونه محاسبات
+* produce a runnable Python script that performs `FUN_00101454` on a 29×29 matrix and prints `hex_output`,
+* visualize the 29×29 bit grid and the produced hex string, or
+* show how to reverse the hex back into the first 5 columns (decode).
 
-* ستون 0 (5 بیت اول): `[1,1,1,1,1]` → `0b11111000` → 248 → `0xF8`
-* ستون 1 (5 بیت اول): `[1,0,0,0,0]` → `0b10000000` → 128 → `0x80`
-* ستون 2 (5 بیت اول): `[1,0,1,1,1]` → `0b11011000` → 216 → `0xD8`
 
-### خروجی مرحله 3 (فرضی)
+
+## Stage 3: Convert to Hex (column-wise reading)
+
+### Sample calculations
+
+* Column 0 (first 5 bits): `[1,1,1,1,1]` → `0b11111000` → 248 → `0xF8`
+* Column 1 (first 5 bits): `[1,0,0,0,0]` → `0b10000000` → 128 → `0x80`
+* Column 2 (first 5 bits): `[1,0,1,1,1]` → `0b11011000` → 216 → `0xD8`
+
+### Stage 3 output (hypothetical)
 
 ```
 f880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860
 ```
 
-* طول: 58 کاراکتر (29 بایت × 2)
+* Length: 58 characters (29 bytes × 2)
 
 ---
 
-## مرحله 4: اضافه کردن Prefix
+## Stage 4: Adding the Prefix
 
-* Prefix تصادفی تولید شده از seed بر اساس زمان:
+* Random prefix generated from a time-based seed:
 
 ```
 Ky7Xm2Qp9Vs1L
 ```
 
-* طول: 14 کاراکتر
+* Length: 14 characters
 
-### خروجی نهایی
+### Final output
 
 ```
 Ky7Xm2Qp9Vs1Lf880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860
 ```
 
-* طول: 72 کاراکتر
+* Length: 72 characters
 
 ---
 
-## 📝 خلاصه نهایی
+## 📝 Final summary
 
-| مرحله          | خروجی                                                               | طول |
-| -------------- | ------------------------------------------------------------------- | --- |
-| ورودی          | ASIS{test}                                                          | 10  |
-| بعد از Padding | ASIS{test}+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*-                           | 38  |
-| بعد از QR      | ماتریس 29×29 باینری                                                 | -   |
-| بعد از Hex     | f880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860              | 58  |
-| خروجی نهایی    | Ky7Xm2Qp9Vs1Lf880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860 | 72  |
+| Stage         | Output                                                              | Length |
+| ------------- | ------------------------------------------------------------------- | ------ |
+| Input         | ASIS{test}                                                          | 10     |
+| After padding | ASIS{test}+-*+-*+-*+-*+-*+-*+-*+-*+-*+-*-                           | 38     |
+| After QR      | 29×29 binary matrix                                                 | -      |
+| After Hex     | f880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860              | 58     |
+| Final output  | Ky7Xm2Qp9Vs1Lf880d8f8f840a8604050d8a8f8f840f840a850f0d8a050d8e8f860 | 72     |
 
-⚠️ توجه: مقادیر Hex و Prefix در بالا فرضی هستند. برای داده واقعی باید کد با کتابخانه `libqrencode` اجرا شود.
+⚠️ Note: The hex values and the prefix above are hypothetical. For real data you must run the code using the `libqrencode` library.
 
+# 📋 Steps to solve the Show_Me CTF challenge
 
+## Stage 1: Binary analysis (Reverse Engineering)
 
-
-
-# 📋 مراحل حل چالش Show_Me CTF
-
-## مرحله 1: تحلیل باینری (Reverse Engineering)
-
-ابتدا باید فایل اجرایی را با ابزارهای مهندسی معکوس تحلیل کنیم:
+First, analyze the executable with reverse-engineering tools:
 
 ```bash
-# بررسی نوع فایل
+# Check file type
 file challenge
 
-# دیس‌اسمبل کردن
+# Disassemble
 
-Ghidra
+# Use Ghidra
 ```
 
-چیزهایی که باید پیدا کنیم:
+Things to identify:
 
-* ✅ تابع padding (`processEntry`) و الگوی `+-*`
-* ✅ استفاده از `libqrencode` برای تولید QR
-* ✅ نحوه تبدیل ماتریس QR به hex (خواندن ستونی)
-* ✅ اضافه شدن 14 کاراکتر prefix تصادفی
+* ✅ The padding function (`processEntry`) and the `+-*` pattern
+* ✅ The use of `libqrencode` to generate the QR
+* ✅ How the QR matrix is converted to hex (column-wise reading)
+* ✅ The addition of a 14-character random prefix
 
 ---
 
-## مرحله 2: شناسایی فرمت داده
+For an actual run, implement the encoding steps using `libqrencode` and reproduce the column-wise hex conversion and prefix generation.
+## Stage 2: Identify data format
 
-از تحلیل کد متوجه می‌شویم:
+From code analysis we understand:
 
 ```
-خروجی = [14 char random] + [hex از QR code]
+output = [14 char random] + [hex of QR code]
 ```
 
-* Prefix 14 کاراکتری تصادفی باید حذف شود.
-* QR Code از نوع Version 3 است (سایز 29×29)
-* داده به صورت 4 بایت در هر سطر ذخیره شده (29 سطر × 4 = 116 بایت = 232 کاراکتر hex)
-* خواندن داده: سطر به سطر، از MSB به LSB
+* The 14-character random prefix must be removed.
+* The QR Code is Version 3 (size 29×29).
+* Data is stored as 4 bytes per row (29 rows × 4 = 116 bytes = 232 hex characters).
+* Reading order: row by row, from MSB to LSB.
 
 ---
 
-## مرحله 3: نوشتن اسکریپت دیکدر
+## Stage 3: Writing the decoder script
 
-برعکس فرآیند encode را پیاده‌سازی می‌کنیم:
+We implement the reverse of the encoding process:
 
 ```python
 from PIL import Image
 from pyzbar.pyzbar import decode
 
 def decode_ctf_qr(output_path):
-    # ── گام 1: خواندن فایل خروجی ──
+    # ── Step 1: read the output file ──
     hexstr = open(output_path, 'r').read().strip()
-    print(f"[+] رشته کامل: {hexstr[:50]}... (طول: {len(hexstr)})")
+    print(f"[+] full string: {hexstr[:50]}... (length: {len(hexstr)})")
 
-    # ── گام 2: حذف 14 کاراکتر prefix ──
+    # ── Step 2: remove 14-char prefix ──
     prefix = hexstr[:14]
     hex_cipher = hexstr[14:]
     print(f"[+] Prefix: {prefix}")
-    print(f"[+] Hex cipher: {hex_cipher[:50]}... (طول: {len(hex_cipher)})")
+    print(f"[+] Hex cipher: {hex_cipher[:50]}... (length: {len(hex_cipher)})")
 
-    # ── گام 3: تبدیل hex به بایت ──
+    # ── Step 3: hex -> bytes ──
     data = bytes.fromhex(hex_cipher)
-    print(f"[+] تعداد بایت‌ها: {len(data)} (انتظار: 116)")
+    print(f"[+] number of bytes: {len(data)} (expected: 116)")
 
-    # ── گام 4: بازسازی ماتریس 29×29 QR ──
+    # ── Step 4: reconstruct 29×29 matrix ──
     size = 29
     matrix = [[0]*size for _ in range(size)]
     for row in range(size):
-        for k in range(4):  # هر سطر 4 بایت
+        for k in range(4):  # 4 bytes per row
             byte_index = row * 4 + k
             byte = data[byte_index]
-            for b in range(8):  # MSB → LSB
+            for b in range(8):  # MSB -> LSB
                 col = k * 8 + b
                 if col < size:
                     bit = (byte >> (7 - b)) & 1
                     matrix[row][col] = bit
-    print(f"[+] ماتریس {size}×{size} بازسازی شد")
+    print(f"[+] reconstructed {size}×{size} matrix")
 
-    # ── گام 5: تبدیل ماتریس به تصویر PNG ──
+    # ── Step 5: matrix -> PNG ──
     scale = 10
     img = Image.new('RGB', (size*scale, size*scale), 'white')
     pixels = img.load()
@@ -1499,16 +1501,16 @@ def decode_ctf_qr(output_path):
                 for dx in range(scale):
                     pixels[x*scale+dx, y*scale+dy] = (color, color, color)
     img.save('reconstructed_qr.png')
-    print("[+] تصویر QR ذخیره شد: reconstructed_qr.png")
+    print('[+] saved QR image: reconstructed_qr.png')
 
-    # ── گام 6: اسکن و دیکد QR Code ──
+    # ── Step 6: scan and decode QR ──
     decoded = decode(img)
     if decoded:
         text = decoded[0].data.decode('utf-8')
         print(f"\n🎉 FLAG: {text}")
         return text
     else:
-        print("❌ QR code خوانده نشد!")
+        print('❌ QR code could not be read!')
         return None
 
 if __name__ == '__main__':
@@ -1517,45 +1519,45 @@ if __name__ == '__main__':
 
 ---
 
-## 🔍 تحلیل دقیق‌تر هر بخش
+## 🔍 Detailed analysis of each part
 
-1. **چرا 14 کاراکتر اول را حذف می‌کنیم؟**
+1. **Why remove the first 14 characters?**
 
 ```c
-// در کد اصلی:
+// in the original code:
 char prefix[15];
 generate_random_prefix(prefix, 14);
 strcat(output, prefix);
 ```
 
-* فقط برای سردرگمی است و اطلاعاتی ندارد.
+* It's only for obfuscation and carries no information.
 
-2. **چرا 116 بایت؟**
+2. **Why 116 bytes?**
 
-* ماتریس QR = 29×29 بیت
-* هر سطر = 29 بیت → نیاز به 4 بایت (32 بیت)
-* کل داده = 29×4 = 116 بایت
+* QR matrix = 29×29 bits
+* Each row = 29 bits → requires 4 bytes (32 bits)
+* Total data = 29×4 = 116 bytes
 
-3. **چرا خواندن MSB-first؟**
+3. **Why MSB-first reading?**
 
 ```python
 bit = (byte >> (7 - b)) & 1
 ```
 
-* مطابق با نحوه encode اصلی.
+* Matches the original encoder's ordering.
 
-4. **چرا scale = 10؟**
+4. **Why scale = 10?**
 
-* برای قابل اسکن شدن QR code توسط pyzbar.
+* To make the QR image large enough to be scanned by `pyzbar`.
 
 ---
 
-## 🚀 اجرای نهایی
+## 🚀 Final execution
 
 ```bash
-# نصب کتابخانه‌ها
+# install libs
 pip install pillow pyzbar
 
-# اجرا
+# run
 python decode_qr.py
 ```
